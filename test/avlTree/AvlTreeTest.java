@@ -2,6 +2,8 @@ package avlTree;
 
 import org.junit.Test;
 
+import java.util.Iterator;
+
 import static org.junit.Assert.*;
 
 public class AvlTreeTest {
@@ -10,9 +12,9 @@ public class AvlTreeTest {
     public void addTest() {
         AvlTree<Integer> tree = new AvlTree<>();
         tree.add(10);
-        tree.add(5);
-        tree.add(15);
         tree.add(3);
+        tree.add(15);
+        tree.add(5);
         tree.add(7);
         tree.add(2);
         assertTrue(tree.checkBalance());
@@ -76,5 +78,30 @@ public class AvlTreeTest {
         assertFalse(tree.contains(10));
         tree.remove(30);
         assertFalse(tree.contains(30));
+    }
+
+    @Test
+    public void iteratorTest() {
+        AvlTree<Integer> tree = new AvlTree<>();
+        tree.add(10);
+        tree.add(3);
+        tree.add(15);
+        tree.add(5);
+        tree.add(7);
+        tree.add(2);
+        Iterator<Integer> iterator = tree.iterator();
+        assertTrue(iterator.hasNext());
+        assertEquals(2, iterator.next().intValue());
+        assertTrue(iterator.hasNext());
+        assertEquals(3, iterator.next().intValue());
+        assertTrue(iterator.hasNext());
+        assertEquals(5, iterator.next().intValue());
+        assertTrue(iterator.hasNext());
+        assertEquals(7, iterator.next().intValue());
+        assertTrue(iterator.hasNext());
+        assertEquals(10, iterator.next().intValue());
+        assertTrue(iterator.hasNext());
+        assertEquals(15, iterator.next().intValue());
+        assertFalse(iterator.hasNext());
     }
 }

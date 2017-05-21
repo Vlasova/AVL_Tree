@@ -46,13 +46,13 @@ public class AvlTree<T extends Comparable<T>> extends AbstractSet<T> {
 
     @Override
     public boolean add(T t) {
-        if(root == null) {
+        if (root == null) {
             root = new Node<>(t);
             size++;
             return true;
         }
         Node<T> nearest = findNearest(t);
-        if(nearest.value == t) {
+        if (nearest.value == t) {
             return false;
         }
         root = add(root, t);
@@ -61,7 +61,7 @@ public class AvlTree<T extends Comparable<T>> extends AbstractSet<T> {
     }
 
     private Node<T> add(Node<T> node, T t) {
-        if(node == null) {
+        if (node == null) {
             return new Node<>(t);
         }
         int comparison = t.compareTo(node.value);
@@ -269,18 +269,30 @@ public class AvlTree<T extends Comparable<T>> extends AbstractSet<T> {
     }
 
     public class AvlTreeIterator implements Iterator<T> {
-        private Node<T> current = null;
+        private Node<T> current;
         private Stack<Node<T>> stack = new Stack();
 
-        private AvlTreeIterator() {}
+        private AvlTreeIterator() {
+            Node<T> node = root;
+            while (node != null) {
+                stack.push(node);
+                current = node;
+                node = node.left;
+            }
+        }
 
         private Node<T> findNext() {
-            throw new UnsupportedOperationException();
+            Node<T> node = current.right;
+            while (node != null) {
+                stack.push(node);
+                node = node.left;
+            }
+            return stack.pop();
         }
 
         @Override
         public boolean hasNext() {
-            return !stack.empty();
+            return !stack.empty() || current.right != null;
         }
 
         @Override
