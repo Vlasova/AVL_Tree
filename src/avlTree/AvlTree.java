@@ -2,6 +2,8 @@ package avlTree;
 
 import java.util.AbstractSet;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.Stack;
 
 
 public class AvlTree<T extends Comparable<T>> extends AbstractSet<T> {
@@ -44,10 +46,14 @@ public class AvlTree<T extends Comparable<T>> extends AbstractSet<T> {
 
     @Override
     public boolean add(T t) {
-        if (root == null) {
+        if(root == null) {
             root = new Node<>(t);
             size++;
             return true;
+        }
+        Node<T> nearest = findNearest(t);
+        if(nearest.value == t) {
+            return false;
         }
         root = add(root, t);
         size++;
@@ -72,13 +78,47 @@ public class AvlTree<T extends Comparable<T>> extends AbstractSet<T> {
     }
 
     @Override
-    public boolean contains(Object o) {
-        return false;
+    public boolean remove(Object o) {
+        @SuppressWarnings("unchecked")
+        T t = (T) o;
+        Node<T> node = findNode(t);
+        if (node == null) return false;
+        Node<T> parent = findParent(node);
+        if (parent == null) {
+            root = delete(node);
+            size--;
+            return true;
+        }
+        int comparison = node.value.compareTo(parent.value);
+        assert comparison != 0;
+        if (comparison < 0) {
+            parent.left = delete(node);
+        }
+        else {
+            parent.right = delete(node);
+        }
+        size--;
+        return true;
     }
 
-    @Override
-    public boolean remove(Object o) {
-        return false;
+    private Node<T> findNearest(T value) {
+        if (root == null) return null;
+        return findNearest(root, value);
+    }
+
+    private Node<T> findNearest(Node<T> start, T value) {
+        int comparison = value.compareTo(start.value);
+        if (comparison == 0) {
+            return start;
+        }
+        else if (comparison < 0) {
+            if (start.left == null) return start;
+            return findNearest(start.left, value);
+        }
+        else {
+            if (start.right == null) return start;
+            return findNearest(start.right, value);
+        }
     }
 
     private Node<T> findParent(Node<T> child) {
@@ -164,13 +204,90 @@ public class AvlTree<T extends Comparable<T>> extends AbstractSet<T> {
         return root.checkBalance();
     }
 
+    private Node<T> delete(Node<T> node) {
+        assert node.checkBalance();
+        if (node.right == null) {
+            return node.left;
+        }
+        else {
+            if (node.left == null) {
+                return node.right;
+            }
+            Node<T> minimumLeft = node.right;
+            Node<T> minimumLeftParent = node;
+            while (minimumLeft.left != null) {
+                minimumLeftParent = minimumLeft;
+                minimumLeft = minimumLeft.left;
+            }
+            minimumLeft.left = node.left;
+            if (minimumLeftParent != node) {
+                minimumLeftParent.left = minimumLeft.right;
+                minimumLeft.right = deleteMinimum(node.right);
+            }
+            return makeBalancing(minimumLeft);
+        }
+    }
+
+    private Node<T> deleteMinimum(Node<T> node) {
+        if (node.left == null) {
+           return node;
+        }
+        node.left = deleteMinimum(node.left);
+        return makeBalancing(node);
+    }
+
+    public boolean checkInvariant() {
+        if (root == null) {
+            return true;
+        }
+        return checkInvariant(root);
+    }
+
+    private boolean checkInvariant(Node<T> node) {
+        Node<T> left = node.left;
+        if (left != null && (left.value.compareTo(node.value) >= 0 || !checkInvariant(left))) return false;
+        Node<T> right = node.right;
+        return right == null || right.value.compareTo(node.value) > 0 && checkInvariant(right);
+    }
+
+    @Override
+    public boolean contains(Object o) {
+        @SuppressWarnings("unchecked")
+        T t = (T) o;
+        Node<T> nearest = findNearest(t);
+        return nearest != null && nearest.value == t;
+    }
+
     @Override
     public Iterator<T> iterator() {
-        return null;
+        return new AvlTreeIterator();
     }
 
     @Override
     public int size() {
         return size;
+    }
+
+    public class AvlTreeIterator implements Iterator<T> {
+        private Node<T> current = null;
+        private Stack<Node<T>> stack = new Stack();
+
+        private AvlTreeIterator() {}
+
+        private Node<T> findNext() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean hasNext() {
+            return !stack.empty();
+        }
+
+        @Override
+        public T next() {
+            current = findNext();
+            if (current == null) throw new NoSuchElementException();
+            return current.value;
+        }
     }
 }
