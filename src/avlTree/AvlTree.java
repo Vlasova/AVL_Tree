@@ -255,7 +255,7 @@ public class AvlTree<T extends Comparable<T>> extends AbstractSet<T> {
         @SuppressWarnings("unchecked")
         T t = (T) o;
         Node<T> nearest = findNearest(t);
-        return nearest != null && nearest.value == t;
+        return nearest != null && t.compareTo(nearest.value) == 0;
     }
 
     @Override

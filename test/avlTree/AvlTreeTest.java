@@ -3,6 +3,7 @@ package avlTree;
 import org.junit.Test;
 
 import java.util.Iterator;
+import java.util.Random;
 
 import static org.junit.Assert.*;
 
@@ -36,6 +37,24 @@ public class AvlTreeTest {
         assertTrue(tree.checkBalance());
         assertTrue(tree.checkInvariant());
         assertEquals(13, tree.size());
+    }
+
+    @Test
+    public void addRandomTest() {
+        Random r = new Random();
+        AvlTree<Integer> tree = new AvlTree<>();
+        int SIZE = 100;
+        int[] arr = new int[SIZE];
+        for (int i=0; i<SIZE; i++) {
+            arr[i] = r.nextInt();
+            tree.add(arr[i]);
+        }
+        assertEquals(100, tree.size());
+        for (int i=0; i<SIZE; i++) {
+            assertTrue(tree.contains(arr[i]));
+        }
+        assertTrue(tree.checkBalance());
+        assertTrue(tree.checkInvariant());
     }
 
     @Test
